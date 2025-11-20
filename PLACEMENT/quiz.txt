@@ -1,0 +1,265 @@
+
+// Just Saying: Player Squad — stores player name and score
+
+Squad Player {
+    Quark name = "Unknown Warrior"
+    Quark score = 0
+
+    Doodle showScore() {
+        Print("Your current score: " + score)
+    }
+}
+
+// Just Saying: Question Squad — structure for each quiz question
+
+Squad Question {
+    Quark questionText
+    Quark category
+    Quark difficulty
+    Quark correctAnswer
+}
+
+// Just Saying: QuizMaster — handles quiz flow, scoring, sarcasm
+
+
+Squad QuizMaster {
+    Quark questions = []
+    Quark player = new Player()
+    Quark selectedCategory = ""
+    Quark selectedDifficulty = ""
+    Quark questionCount = 0
+    Quark MAX_QUESTIONS = 5
+
+    //  Just Saying: Start the quiz
+
+    Doodle start() {
+        Print("Welcome to *Quiz Master* — where knowledge meets sarcasm!")
+
+        player.name = Input("Enter your name, brave human: ")
+
+        chooseCategory()
+        chooseDifficulty()
+
+        Print("Generating your quiz on " + selectedCategory + " (" + selectedDifficulty + ") ...")
+
+        Quark pool = getFilteredQuestions()
+
+        //  Just Saying: Shuffle logic
+        SpinCycle(i = 0; i < pool.length; i = i + 1) {
+            Quark r = Random(0, pool.length - 1)
+            Quark temp = pool[i]
+            pool[i] = pool[r]
+            pool[r] = temp
+        }
+
+        //  Just Saying: Ask only first 5 questions
+
+        SpinCycle(i = 0; i < MAX_QUESTIONS AND i < pool.length; i = i + 1) {
+            askQuestion(pool[i])
+            questionCount = questionCount + 1
+        }
+
+        endGame()
+    }
+
+
+    //  Just Saying: Category selection
+
+    Doodle chooseCategory() {
+        Print("Choose a category: Science / History / FunFacts")
+        Quark cat = Input("Category: ")
+
+        If (cat == "Science" OR cat == "History" OR cat == "FunFacts") {
+            selectedCategory = cat
+        } Else {
+            Print("Invalid category. Defaulting to Science.")
+            selectedCategory = "Science"
+        }
+    }
+
+    //  Just Saying: Difficulty selection
+
+    Doodle chooseDifficulty() {
+        Print("Choose difficulty: Easy / Medium / Hard")
+        Quark diff = Input("Difficulty: ")
+
+        If (diff == "Easy" OR diff == "Medium" OR diff == "Hard") {
+            selectedDifficulty = diff
+        } Else {
+            Print("Invalid choice. Defaulting to Easy.")
+            selectedDifficulty = "Easy"
+        }
+    }
+
+    //  Just Saying: Filter questions by category & difficulty
+
+    Doodle getFilteredQuestions() {
+        Quark pool = []
+
+        SpinCycle(i = 0; i < questions.length; i = i + 1) {
+            Quark q = questions[i]
+
+            If (q.category == selectedCategory AND q.difficulty == selectedDifficulty) {
+                pool.add(q)
+            }
+        }
+
+        If (pool.length < 5) {
+            Print("Not enough questions! Awarding pity points +10.")
+            player.score = player.score + 10
+        }
+
+        Return pool
+    }
+
+    // Ask one question
+
+    Doodle askQuestion(q) {
+        Print("Q" + (questionCount + 1) + ": " + q.questionText)
+        Quark ans = Input("Your answer: ")
+
+        evaluateAnswer(q, ans)
+        player.showScore()
+        Print("--------------------------------")
+    }
+
+    //  Just Saying: Evaluate correctness
+
+    Doodle evaluateAnswer(q, ans) {
+        If (ans.lower() == q.correctAnswer.lower()) {
+            commentOnAnswer(True)
+            applyScore(q.difficulty, True)
+        } Else {
+            commentOnAnswer(False)
+            applyScore(q.difficulty, False)
+        }
+    }
+
+    //  Just Saying: Scoring logic
+
+    Doodle applyScore(diff, isCorrect) {
+        If (diff == "Easy") {
+            player.score = player.score + (isCorrect ? 5 : -2)
+        }
+        Else If (diff == "Medium") {
+            player.score = player.score + (isCorrect ? 10 : -5)
+        }
+        Else If (diff == "Hard") {
+            player.score = player.score + (isCorrect ? 15 : -7)
+        }
+    }
+
+    //  Just Saying: Sarcasm generator
+
+    Doodle commentOnAnswer(isCorrect) {
+        If (isCorrect) {
+            Print("Well, someone paid attention in school!")
+        } Else {
+            Print("Close… if we were grading on imagination.")
+        }
+    }
+
+    //  Just Saying: End of Quiz
+
+    Doodle endGame() {
+        Print("============ QUIZ OVER ============")
+        Print("Final Score: " + player.score)
+
+        If (player.score >= 60) {
+            Print("Quiz Royalty has arrived!")
+        }
+        Else If (player.score >= 30 AND player.score < 60) {
+            Print("Quiz Master in training.")
+        }
+        Else {
+            Print("Better luck next time, genius.")
+        }
+
+        Print("Thanks for playing, " + player.name + "!")
+    }
+}
+
+
+//  Just Saying: CREATE QUIZMASTER
+
+Quark quiz = new QuizMaster()
+
+
+//  Just Saying: ADDING 45 QUESTIONS (5 each group)
+
+
+//  Just Saying: SCIENCE EASY
+
+quiz.questions.add(new Question("What is the symbol for water?", "Science", "Easy", "H2O"))
+quiz.questions.add(new Question("What gas do plants breathe in?", "Science", "Easy", "Carbon Dioxide"))
+quiz.questions.add(new Question("What star is closest to Earth?", "Science", "Easy", "Sun"))
+quiz.questions.add(new Question("What planet is blue?", "Science", "Easy", "Earth"))
+quiz.questions.add(new Question("How many legs do insects have?", "Science", "Easy", "6"))
+
+//  Just Saying: SCIENCE MEDIUM
+
+quiz.questions.add(new Question("What planet is known as the Red Planet?", "Science", "Medium", "Mars"))
+quiz.questions.add(new Question("What gas do humans need to breathe?", "Science", "Medium", "Oxygen"))
+quiz.questions.add(new Question("Human body has how many bones?", "Science", "Medium", "206"))
+quiz.questions.add(new Question("What is the speed of light?", "Science", "Medium", "300000 km/s"))
+quiz.questions.add(new Question("What force keeps us on Earth?", "Science", "Medium", "Gravity"))
+
+//  Just Saying: SCIENCE HARD
+
+quiz.questions.add(new Question("What particle has a negative charge?", "Science", "Hard", "Electron"))
+quiz.questions.add(new Question("What is the heaviest naturally occurring element?", "Science", "Hard", "Uranium"))
+quiz.questions.add(new Question("What is the powerhouse of the cell?", "Science", "Hard", "Mitochondria"))
+quiz.questions.add(new Question("What is Newton’s 3rd law?", "Science", "Hard", "Every action has an equal and opposite reaction"))
+quiz.questions.add(new Question("What is the hardest natural substance?", "Science", "Hard", "Diamond"))
+
+//  Just Saying: HISTORY EASY
+
+quiz.questions.add(new Question("Who discovered America?", "History", "Easy", "Christopher Columbus"))
+quiz.questions.add(new Question("Who was the first President of the USA?", "History", "Easy", "George Washington"))
+quiz.questions.add(new Question("Which country built the Great Wall?", "History", "Easy", "China"))
+quiz.questions.add(new Question("Who invented the light bulb?", "History", "Easy", "Thomas Edison"))
+quiz.questions.add(new Question("Who was the first man on the moon?", "History", "Easy", "Neil Armstrong"))
+
+//  Just Saying: HISTORY MEDIUM
+
+quiz.questions.add(new Question("When did World War II end?", "History", "Medium", "1945"))
+quiz.questions.add(new Question("Who was known as Iron Lady?", "History", "Medium", "Margaret Thatcher"))
+quiz.questions.add(new Question("Which empire built Machu Picchu?", "History", "Medium", "Inca"))
+quiz.questions.add(new Question("Who was the first Mughal Emperor of India?", "History", "Medium", "Babur"))
+quiz.questions.add(new Question("Who wrote the Constitution of India?", "History", "Medium", "BR Ambedkar"))
+
+//  Just Saying: HISTORY HARD
+
+quiz.questions.add(new Question("Who discovered penicillin?", "History", "Hard", "Alexander Fleming"))
+quiz.questions.add(new Question("When did the Roman Empire fall?", "History", "Hard", "476 AD"))
+quiz.questions.add(new Question("When was the Battle of Hastings?", "History", "Hard", "1066"))
+quiz.questions.add(new Question("Who was Cleopatra?", "History", "Hard", "Queen of Egypt"))
+quiz.questions.add(new Question("Who was the last Tsar of Russia?", "History", "Hard", "Nicholas II"))
+
+//  Just Saying: FUNFACTS EASY
+
+quiz.questions.add(new Question("Which animal says meow?", "FunFacts", "Easy", "Cat"))
+quiz.questions.add(new Question("Which animal barks?", "FunFacts", "Easy", "Dog"))
+quiz.questions.add(new Question("What is the tallest mammal?", "FunFacts", "Easy", "Giraffe"))
+quiz.questions.add(new Question("Which food is yellow and curved?", "FunFacts", "Easy", "Banana"))
+quiz.questions.add(new Question("Which animal can fly?", "FunFacts", "Easy", "Bird"))
+
+//  Just Saying: FUNFACTS MEDIUM
+
+quiz.questions.add(new Question("Which animal sleeps 18 hours a day?", "FunFacts", "Medium", "Koala"))
+quiz.questions.add(new Question("What fruit has seeds on the outside?", "FunFacts", "Medium", "Strawberry"))
+quiz.questions.add(new Question("Which animal has 3 hearts?", "FunFacts", "Medium", "Octopus"))
+quiz.questions.add(new Question("What is the fastest bird?", "FunFacts", "Medium", "Peregrine Falcon"))
+quiz.questions.add(new Question("What is the only mammal that can fly?", "FunFacts", "Medium", "Bat"))
+
+//  Just Saying: FUNFACTS HARD
+
+quiz.questions.add(new Question("What animal cannot jump?", "FunFacts", "Hard", "Elephant"))
+quiz.questions.add(new Question("What is the rarest blood type?", "FunFacts", "Hard", "AB Negative"))
+quiz.questions.add(new Question("What is the only food that never spoils?", "FunFacts", "Hard", "Honey"))
+quiz.questions.add(new Question("What country has the most pyramids?", "FunFacts", "Hard", "Sudan"))
+quiz.questions.add(new Question("What is largest ocean?", "FunFacts", "Hard", "Pacific"))
+
+//  Just Saying: START QUIZ
+
+quiz.start()
