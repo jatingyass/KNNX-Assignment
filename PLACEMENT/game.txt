@@ -1,21 +1,19 @@
 //////////////////////////////////////////////////////////////////////
-// Just Saying: Player Squad — manages player name, inventory, movement
+// Just Saying: Player Squad — Tracks player's info & actions
 //////////////////////////////////////////////////////////////////////
-
-
 Squad Player {
     Quark name = "Unnamed Hero"
     Quark inventory = []
     Quark currentRoom = Null
     Quark isAlive = True
 
-    // Just Saying: Pick up an item
+    // Just Saying: Add an item to player's pocket
     Doodle pickUp(item) {
         inventory.add(item)
         Print("You picked up the " + item + ". Confidence level +10.")
     }
 
-    // Just Saying: Move to another room if possible
+    // Just Saying: Move in a direction (or into a wall…)
     Doodle move(direction) {
         Quark room = currentRoom
 
@@ -28,7 +26,7 @@ Squad Player {
         }
     }
 
-    // Just Saying: Show player inventory
+    // Just Saying: Show inventory contents
     Doodle showInventory() {
         If (inventory.length == 0) {
             Print("Your pockets are empty. Your soul probably too.")
@@ -40,10 +38,8 @@ Squad Player {
 
 
 //////////////////////////////////////////////////////////////////////
-// Just Saying: Room Squad — describes rooms, items, exits, interactions
+// Just Saying: Room Squad — Defines rooms, items, and puzzles
 //////////////////////////////////////////////////////////////////////
-
-
 Squad Room {
     Quark name
     Quark description
@@ -51,7 +47,7 @@ Squad Room {
     Quark exits = {}
     Quark solved = False
 
-    // Just Saying: Room description
+    // Show room details
     Doodle showDetails() {
         Print("---- " + name + " ----")
         Print(description)
@@ -63,21 +59,25 @@ Squad Room {
         }
     }
 
-    // Just Saying: Interaction logic (Locked Door & Riddle)
+    // Puzzle interactions
     Doodle interact() {
+
         // Just Saying: Locked Door Puzzle
         If (name == "Locked Door Room" AND solved == False) {
+
             If (GameManager.player.inventory.contains("rusty key")) {
                 Print("You unlock the door with the rusty key. The door sighs in relief.")
                 solved = True
                 exits["east"] = "Treasure Room"
-            } Else {
-                Print("The door stares at you blankly. Perhaps it's missing something — like a key?")
+            }
+            Else {
+                Print("The door stares at you blankly. Maybe bring a key?")
             }
         }
 
         // Just Saying: Riddle Puzzle
         If (name == "Riddle Room" AND solved == False) {
+
             Print("A stone tablet asks: 'What has keys but can't open locks?'")
             Quark ans = Input("Your answer: ")
 
@@ -94,15 +94,13 @@ Squad Room {
 
 
 //////////////////////////////////////////////////////////////////////
-// Just Saying: Game Manager Squad — handles game loop, commands, setup
+// Just Saying: GameManager Squad — Controls entire gameplay
 //////////////////////////////////////////////////////////////////////
-
-
 Squad GameManager {
     Quark rooms = {}
     Quark player = new Player()
 
-    // Just Saying: Start the entire game
+    // Start the whole adventure
     Doodle startGame() {
         Print("Welcome to the Mysterious Land of KN-Lang!")
         setupRooms()
@@ -116,13 +114,16 @@ Squad GameManager {
         }
     }
 
-    // Just Saying: Command interpreter
+    // Handles all commands typed by the human
     Doodle handleCommand(cmd) {
         Quark parts = cmd.split(" ")
 
+        // go <direction>
         If (parts[0] == "go") {
             player.move(parts[1])
         }
+
+        // pick <item>
         Else If (parts[0] == "pick") {
             Quark item = parts.slice(1).join(" ")
             Quark room = player.currentRoom
@@ -134,35 +135,44 @@ Squad GameManager {
                 Print("You can't pick that. It's imaginary.")
             }
         }
+
+        // look
         Else If (parts[0] == "look") {
             player.currentRoom.showDetails()
         }
+
+        // inventory
         Else If (parts[0] == "inventory") {
             player.showInventory()
         }
+
+        // interact
         Else If (parts[0] == "interact") {
             player.currentRoom.interact()
         }
+
+        // quit
         Else If (parts[0] == "quit") {
             player.isAlive = False
             Print("You exit the game. The world cries softly.")
         }
+
         Else {
             Print("Invalid command. Your brain might need debugging.")
         }
     }
 
-    // Just Saying: Room setup logic
+    // Create rooms & connect them
     Doodle setupRooms() {
 
-        // Just Saying: Entrance Room
+        // Entrance
         Quark entrance = new Room()
         entrance.name = "Entrance"
         entrance.description = "You wake up in a weird room. Smells like deadlines."
         entrance.exits = { "north": "Spooky Dungeon", "east": "Riddle Room" }
         rooms["Entrance"] = entrance
 
-        // Just Saying: Spooky Dungeon
+        // Dungeon
         Quark dungeon = new Room()
         dungeon.name = "Spooky Dungeon"
         dungeon.description = "Damp walls, moldy smell, and a distant snore..."
@@ -170,21 +180,21 @@ Squad GameManager {
         dungeon.exits = { "south": "Entrance", "west": "Locked Door Room" }
         rooms["Spooky Dungeon"] = dungeon
 
-        // Just Saying: Locked Door Room
+        // Locked Door Room
         Quark locked = new Room()
         locked.name = "Locked Door Room"
         locked.description = "A giant locked door blocks your way."
         locked.exits = { "east": "Spooky Dungeon" }
         rooms["Locked Door Room"] = locked
 
-        // Just Saying: Riddle Room
+        // Riddle Room
         Quark riddle = new Room()
         riddle.name = "Riddle Room"
         riddle.description = "A glowing tablet floats mysteriously."
         riddle.exits = { "west": "Entrance" }
         rooms["Riddle Room"] = riddle
 
-        // Just Saying: Treasure Room
+        // Treasure Room
         Quark treasure = new Room()
         treasure.name = "Treasure Room"
         treasure.description = "You found the treasure! Also free snacks."
@@ -194,6 +204,5 @@ Squad GameManager {
 }
 
 
-// Just Saying: Start the game
-
+// Just Saying: Start the magical chaos
 GameManager.startGame()
